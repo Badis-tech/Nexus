@@ -62,3 +62,11 @@ Live at https://nexus-olive-three-18.vercel.app (Vercel project `nexus`, team ba
 | `python3` edit + `cat > app/resend-confirmation/page.tsx` | New "resend confirmation email" page and action; login now sends unconfirmed users there |
 | `npx tsc --noEmit`, `npx eslint .`, `npx next build` (scratch copy) | Type check, lint, build: clean |
 | Supabase: SQL count of users / confirmed / emails sent | Confirm email confirmation is switched on and has worked once |
+
+## 2026-11-16: login / sign-up problem
+
+| Command | Purpose |
+|---|---|
+| Supabase: auth logs for the evening, and account state (no email addresses read) | Find why login and sign-up fail: wrong password on a confirmed account, repeat sign-ups that send nothing, hourly email limit reached |
+| `python3` edit of `web/app/auth/actions.ts` | Clear messages for the email limit and for signing up with an email that already has an account; forgot-password no longer claims success when the email was not sent |
+| `npx tsc --noEmit`, `npx eslint .`, `npx next build` (scratch copy) | Type check, lint, build: clean |

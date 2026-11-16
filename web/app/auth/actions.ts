@@ -7,6 +7,11 @@ import { requireViewer, withMessage } from "@/lib/auth";
 
 const str = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
 
+// Supabase limits how many emails a project can send per hour.
+const EMAIL_LIMIT = "We cannot send more emails right now. Please try again in about an hour.";
+const isEmailLimit = (e: { status?: number; code?: string } | null) =>
+  e?.status === 429 || e?.code === "over_email_send_rate_limit";
+
 export async function signUp(formData: FormData) {
   const email = str(formData, "email");
   const password = String(formData.get("password") ?? "");
@@ -33,10 +38,17 @@ export async function signUp(formData: FormData) {
       emailRedirectTo: `${origin}/auth/callback`,
     },
   });
+  if (isEmailLimit(error)) redirect(withMessage("/signup", "error", EMAIL_LIMIT));
   if (error) redirect(withMessage("/signup", "error", error.message));
   if (data.session) redirect("/dashboard");
+  // Supabase answers the same way for an email that already has an account
+  // (and sends nothing), so the message has to cover both cases.
   redirect(
-    withMessage("/resend-confirmation", "notice", "Check your email to confirm your account, then log in. Nothing arrived? Send it again below."),
+    withMessage(
+      "/login",
+      "notice",
+      "Check your email for a confirmation link. If you already had an account with this email, no email is sent: log in, or use Forgot your password.",
+    ),
   );
 }
 
@@ -69,9 +81,10 @@ export async function requestPasswordReset(formData: FormData) {
   const origin = h.get("origin") ?? `http://${h.get("host")}`;
   const supabase = await createSupabaseServer();
   if (email) {
-    await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${origin}/auth/callback?next=/reset-password`,
     });
+    if (isEmailLimit(error)) redirect(withMessage("/forgot-password", "error", EMAIL_LIMIT));
   }
   redirect(
     withMessage("/forgot-password", "notice", "If that email has an account, a reset link is on its way. Open it in this browser."),
@@ -107,10 +120,10 @@ export async function resendConfirmation(formData: FormData) {
       email,
       options: { emailRedirectTo: `${origin}/auth/callback` },
     });
-    limited = error?.status === 429;
+    limited = isEmailLimit(error);
   }
   if (limited) {
-    redirect(withMessage("/resend-confirmation", "error", "Too many emails were requested. Wait a minute and try again."));
+    redirect(withMessage("/resend-confirmation", "error", EMAIL_LIMIT));
   }
   redirect(
     withMessage("/resend-confirmation", "notice", "If that email has an account waiting for confirmation, a new link is on its way. Check spam too."),
