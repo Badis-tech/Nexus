@@ -70,3 +70,20 @@ Live at https://nexus-olive-three-18.vercel.app (Vercel project `nexus`, team ba
 | Supabase: auth logs for the evening, and account state (no email addresses read) | Find why login and sign-up fail: wrong password on a confirmed account, repeat sign-ups that send nothing, hourly email limit reached |
 | `python3` edit of `web/app/auth/actions.ts` | Clear messages for the email limit and for signing up with an email that already has an account; forgot-password no longer claims success when the email was not sent |
 | `npx tsc --noEmit`, `npx eslint .`, `npx next build` (scratch copy) | Type check, lint, build: clean |
+
+## 2026-11-16: demo data
+
+| Command | Purpose |
+|---|---|
+| `npm i bcryptjs` (scratch copy), `node` to generate a random password and its hash | Demo password, written only to `DEMO-ACCOUNTS.local.md`; the database gets the hash |
+| `cat > DEMO-ACCOUNTS.local.md`, add `*.local.md` to `.gitignore` | Record the demo logins locally and keep them out of git |
+| Supabase: SQL to create 7 demo accounts, 9 jobs, requests, decisions and 11 reviews | Populate the platform through the same functions real users go through, so stats and scores are real |
+| Built-in browser: live home page, search, one job page, one user card | Confirm the demo data shows correctly on the deployed site |
+
+## 2026-11-16: employers see workers, workers see jobs
+
+| Command | Purpose |
+|---|---|
+| Built-in browser: one `fetch` of the workers query against the live API | Confirm filtering by skill and city and sorting by score works before building the page |
+| `cat > app/workers/page.tsx`, `python3` edits of header, home and dashboard | New "Find workers" page for employers; employers land there instead of the job list |
+| `npx tsc --noEmit`, `npx eslint .`, `npx next build` (scratch copy) | Type check, lint, build: one type error caught and fixed, then clean |

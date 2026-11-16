@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
 import { JOB_COLUMNS, type Job } from "@/lib/site";
 import { getCategories } from "@/lib/categories";
@@ -10,6 +11,8 @@ const PAGE_SIZE = 20;
 export default async function HomePage({ searchParams }: { searchParams: PageParams }) {
   const params = await searchParams;
   const { supabase, profile } = await getViewer();
+  // Employers hire, so their home is the worker list; their own jobs are on the dashboard.
+  if (profile?.role === "employer") redirect("/workers");
   const categories = await getCategories();
   const one = (k: string) => (typeof params[k] === "string" ? (params[k] as string).trim() : "");
   const q = one("q");
@@ -101,12 +104,7 @@ export default async function HomePage({ searchParams }: { searchParams: PagePar
         <p className="card text-sm text-red-700" role="alert">Jobs could not be loaded. Refresh to try again.</p>
       ) : jobs.length === 0 ? (
         <p className="card text-sm text-slate-600">
-          No open jobs match.{" "}
-          {profile?.role === "employer" ? (
-            <Link href="/jobs/new" className="text-brand underline">Post one</Link>
-          ) : (
-            "Try a wider search."
-          )}
+          No open jobs match. Try a wider search.
         </p>
       ) : (
         <>

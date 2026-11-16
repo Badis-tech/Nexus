@@ -11,7 +11,11 @@ export async function SiteHeader() {
         <Link href="/" className="mr-auto text-base font-semibold text-brand">
           {SITE_NAME}
         </Link>
-        <Link href="/" className={link}>Jobs</Link>
+        {profile?.role === "employer" ? (
+          <Link href="/workers" className={link}>Workers</Link>
+        ) : (
+          <Link href="/" className={link}>Jobs</Link>
+        )}
         <Link href="/pricing" className={link}>Plans</Link>
         {profile ? (
           <>

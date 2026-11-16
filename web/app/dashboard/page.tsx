@@ -29,7 +29,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pa
       jobs.length === 0 ? (
         <div className="card text-sm">
           <p>You have not posted a job yet.</p>
-          <Link href="/jobs/new" className="btn mt-3">Post a job</Link>
+          <div className="mt-3 flex gap-2">
+            <Link href="/jobs/new" className="btn">Post a job</Link>
+            <Link href="/workers" className="btn-ghost">Browse workers</Link>
+          </div>
         </div>
       ) : (
         <ul className="space-y-3">
