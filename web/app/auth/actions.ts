@@ -35,7 +35,9 @@ export async function signUp(formData: FormData) {
   });
   if (error) redirect(withMessage("/signup", "error", error.message));
   if (data.session) redirect("/dashboard");
-  redirect(withMessage("/login", "notice", "Check your email to confirm your account, then log in."));
+  redirect(
+    withMessage("/resend-confirmation", "notice", "Check your email to confirm your account, then log in. Nothing arrived? Send it again below."),
+  );
 }
 
 export async function signIn(formData: FormData) {
@@ -44,6 +46,11 @@ export async function signIn(formData: FormData) {
     email: str(formData, "email"),
     password: String(formData.get("password") ?? ""),
   });
+  if (error?.code === "email_not_confirmed") {
+    redirect(
+      withMessage("/resend-confirmation", "error", "Your email is not confirmed yet. Open the link we sent you, or get a new one below."),
+    );
+  }
   if (error) redirect(withMessage("/login", "error", "Wrong email or password."));
   redirect("/dashboard");
 }
@@ -84,4 +91,28 @@ export async function resetPassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password });
   if (error) redirect(withMessage("/reset-password", "error", error.message));
   redirect(withMessage("/dashboard", "notice", "Password changed. You are logged in."));
+}
+
+// Sends the sign-up confirmation email again. Same answer whether or not the
+// address has an account waiting, so it reveals nothing.
+export async function resendConfirmation(formData: FormData) {
+  const email = str(formData, "email");
+  const h = await headers();
+  const origin = h.get("origin") ?? `http://${h.get("host")}`;
+  const supabase = await createSupabaseServer();
+  let limited = false;
+  if (email) {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${origin}/auth/callback` },
+    });
+    limited = error?.status === 429;
+  }
+  if (limited) {
+    redirect(withMessage("/resend-confirmation", "error", "Too many emails were requested. Wait a minute and try again."));
+  }
+  redirect(
+    withMessage("/resend-confirmation", "notice", "If that email has an account waiting for confirmation, a new link is on its way. Check spam too."),
+  );
 }

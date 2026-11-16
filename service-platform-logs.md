@@ -40,3 +40,25 @@ Commands run and what each was for:
 | Add repo `Badis-tech/Nexus` to the session with push access | Refused: Claude has no push access to that repo |
 | `ls -a`, `git remote -v`, `git ls-remote`, `git config --list` | Check the folder is not yet a git repo and whether this shell has GitHub credentials (it has none) |
 | Vercel: list teams | Find the team to deploy under (badis' projects) |
+
+## 2026-11-16: deployed to Vercel
+
+Live at https://nexus-olive-three-18.vercel.app (Vercel project `nexus`, team badis' projects, repo Badis-tech/Nexus, root directory `web`).
+
+| Command | Purpose |
+|---|---|
+| Vercel: create git project `nexus` linked to Badis-tech/Nexus, root `web` | Every push to `main` deploys |
+| Vercel: add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Point the deployed app at the Supabase project |
+| Vercel: create production deployment from `main` (first try refused for missing project settings, second passed) | Build and publish commit efc4ba1 |
+| Vercel: get deployment, get project | Confirm the build is ready and read the domains |
+| Web fetch of the live home page | Confirm it is public and reads from the database |
+
+## 2026-11-16: test pass
+
+| Command | Purpose |
+|---|---|
+| Supabase: SQL scenario in a rolled-back transaction (2 employers, 3 workers, 2 volunteers) | Plans and limits, applying, accepting, declining, withdrawing, volunteer jobs, done, reviews, late cancel, phone privacy, cross-account access, account deletion. All 30+ checks passed; nothing was left in the database |
+| Built-in browser: 11 pages on the live site, signed out | Home, search, pricing, sign-up role preselect, login, reset page, 404, private pages redirect to login, bad email-link code shows a clear error |
+| `python3` edit + `cat > app/resend-confirmation/page.tsx` | New "resend confirmation email" page and action; login now sends unconfirmed users there |
+| `npx tsc --noEmit`, `npx eslint .`, `npx next build` (scratch copy) | Type check, lint, build: clean |
+| Supabase: SQL count of users / confirmed / emails sent | Confirm email confirmation is switched on and has worked once |

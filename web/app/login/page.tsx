@@ -22,6 +22,8 @@ export default async function LoginPage({ searchParams }: { searchParams: PagePa
       </form>
       <p className="mt-4 text-sm text-slate-600">
         <Link className="text-brand underline" href="/forgot-password">Forgot your password?</Link>
+        {" · "}
+        <Link className="text-brand underline" href="/resend-confirmation">Resend confirmation email</Link>
       </p>
       <p className="mt-2 text-sm text-slate-600">
         No account yet? <Link className="text-brand underline" href="/signup">Sign up</Link>
